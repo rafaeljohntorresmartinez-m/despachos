@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Logístico y Recepciones</title>
+    <style>
+        /* FONDO GENERAL */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #eef5fb; margin: 0; padding: 20px; }
+        
+        /* CONTENEDOR PRINCIPAL */
+        .container { max-width: 1400px; margin: auto; background-color: #f0f5fa; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); overflow: hidden; }
+        
+        /* HEADER CORPORATIVO */
+        .brand-header-light {
+            background-color: transparent; 
+            padding: 20px 30px 5px 30px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-bottom: 3px solid #0055a5;
+            position: relative;
+        }
+        .brand-header-light img {
+            max-height: 100px;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+        }
+
+        /* ANIMACIÓN DEL TRÁILER */
+        .truck-wrapper {
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 35px;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .truck-icon {
+            position: absolute;
+            bottom: 0px;
+            left: -60px;
+            font-size: 28px;
+            transform: scaleX(-1); 
+            animation: driveTruck 12s linear infinite;
+        }
+
+        @keyframes driveTruck {
+            0% { left: -60px; }
+            100% { left: 100%; }
+        }
+        
+        .content-padding { padding: 30px; }
+        
+        /* ANIMACIÓN PARA EL TÍTULO */
+        @keyframes float-title {
+            0% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-4px) scale(1.01); text-shadow: 0 4px 8px rgba(0, 85, 165, 0.1); }
+            100% { transform: translateY(0px) scale(1); }
+        }
+
+        .animated-title {
+            text-align: center;
+            animation: float-title 3s ease-in-out infinite;
+            margin-bottom: 25px;
+        }
+
+        .animated-title h1 { color: #0055a5; margin-bottom: 5px; margin-top: 0; }
+        .animated-title h3 { color: #666; margin-top: 0; margin-bottom: 0; }
+        
+        /* BARRA DE FILTROS */
+        .filter-section {
+            background-color: #f8fbfd;
+            border: 1px solid #cce1f0;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 150px;
+            flex: 1;
+        }
+        .filter-group label {
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #0055a5;
+            margin-bottom: 5px;
+        }
+        .filter-group select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #333;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .filter-group select:focus { border-color: #0055a5; }
+        
+        .btn-clear {
+            background-color: #e3a833; color: white; border: none; padding: 9px 15px;
+            border-radius: 4px; cursor: pointer; font-weight: bold; transition: background-color 0.2s; height: 35px;
+        }
+        .btn-clear:hover { background-color: #c99329; }
+
+        .btn-action {
+            background-color: #6f42c1; color: white; border: none; padding: 9px 15px;
+            border-radius: 4px; cursor: pointer; font-weight: bold; transition: background-color 0.2s; height: 35px;
+        }
+        .btn-action:hover { background-color: #59339d; }
+
+        /* KPIS */
+        .kpi-container { display: flex; justify-content: space-around; margin-bottom: 30px; gap: 15px;}
+        .kpi-card { color: white; padding: 20px; border-radius: 8px; flex: 1; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .kpi-card h3 { margin: 0; font-size: 1.1em; font-weight: normal; }
+        .kpi-card h2 { margin: 10px 0 0 0; font-size: 1.8em; color: white; }
+        
+        .chart-row { display: flex; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .chart-container { width: 48%; min-width: 400px; margin-bottom: 10px; flex: 1; background:white; border-radius:8px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+        .full-width { width: 100%; background:white; border-radius:8px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); margin-bottom: 20px; }
+
+        /* TABLAS Y FILTROS EN COLUMNAS */
+        .table-wrapper { margin-top: 40px; }
+        .table-container { width: 100%; max-height: 450px; overflow-y: auto; overflow-x: auto; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); background: white; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85em; table-layout: auto; }
+        th { background-color: #0055a5; color: white; padding: 8px 10px; text-align: left; position: sticky; top: 0; z-index: 1; }
+        td { padding: 8px 10px; border-bottom: 1px solid #eee; color: #333; vertical-align: middle; word-wrap: break-word; }
+        tr:nth-child(even) { background-color: #f8fbfd; }
+        tr:hover { background-color: #e2eef8; }
+        .table-footer { font-weight: bold; background-color: #e9ecef; position: sticky; bottom: 0; z-index: 1; }
+        .table-footer td { border-top: 2px solid #ccc; color: #333;}
+        
+        .table-filter-input {
+            width: 100%;
+            padding: 4px;
+            font-size: 0.85em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            color: #333;
+        }
+        .table-filter-input::placeholder { color: #aaa; font-weight: normal; }
+
+        .tab-buttons { display: flex; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
+        .tab-button { background-color: #e9ecef; border: 1px solid #ccc; padding: 10px 20px; cursor: pointer; font-size: 15px; margin: 5px; border-radius: 4px; transition: 0.2s; font-weight: bold; color: #555; }
+        .tab-button:hover { background-color: #d4d4d4; }
+        .tab-button.active { background-color: #0055a5; color: white; border-color: #0055a5; }
+        
+        /* ESTILO PARA BOTONES VERDES (PROGRAMADOS) */
+        .tab-button.green-active { background-color: #28a745 !important; color: white !important; border-color: #28a745 !important; }
+
+        .tab-content { padding: 20px; border: 1px solid #ccc; border-radius: 8px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .loading { text-align: center; font-weight: bold; padding: 20px; color: #0055a5; }
+        .green-table th { background-color: #28a745; }
+
+        /* MODAL NIVEL DE SERVICIO */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 1100px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; margin-top: -10px; }
+        .close:hover, .close:focus { color: #000; text-decoration: none; cursor: pointer; }
+    </style>
+    
+    <!-- Scripts de Plotly y ECharts -->
+    <script charset="utf-8" src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER LOGO -->
+        <div class="brand-header-light">
+            <img src="premex.png" alt="Logotipo Premex">
+            <div class="truck-wrapper">
+                <div class="truck-icon">🚛</div>
+            </div>
+        </div>
+
+        <div class="content-padding">
+            <div class="animated-title">
+                <h1>Dashboard Integrado</h1>
+                <h3>Logística y Recepciones</h3>
+            </div>
+            
+            <div id="loading" class="loading">Cargando datos desde Google Sheets...</div>
+
+            <!-- SECCIÓN DE FILTROS GLOBALES -->
+            <div class="filter-section" id="filter-section" style="display: none;">
+                <div class="filter-group">
+                    <label>Mes</label>
+                    <select id="filter-mes" onchange="applyFilters()">
+                        <option value="">Todos los Meses</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Zona</label>
+                    <select id="filter-zona" onchange="applyFilters()">
+                        <option value="">Todas las Zonas</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Destino</label>
+                    <select id="filter-destino" onchange="applyFilters()">
+                        <option value="">Todos los Destinos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Cliente</label>
+                    <select id="filter-cliente" onchange="applyFilters()">
+                        <option value="">Todos los Clientes</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>SKU</label>
+                    <select id="filter-sku" onchange="applyFilters()">
+                        <option value="">Todos los SKU</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select id="filter-status" onchange="applyFilters()">
+                        <option value="">Todos los Status</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Novedad</label>
+                    <select id="filter-novedad" onchange="applyFilters()">
+                        <option value="">Todas las Novedades</option>
+                    </select>
+                </div>
+                <button class="btn-clear" onclick="clearFilters()">Limpiar Filtros</button>
+                <button class="btn-action" onclick="openModalNs()">📊 Nivel de Servicio</button>
+            </div>
+
+            <!-- KPIS -->
+            <div class="kpi-container">
+                <div class="kpi-card" style="background-color: #0055a5;">
+                    <h3>Total KG Solicitados</h3>
+                    <h2 id="kpi-total-kg">0 kg</h2>
+                </div>
+                <div class="kpi-card" style="background-color: #e3a833;">
+                    <h3>Total Pedidos</h3>
+                    <h2 id="kpi-total-pedidos">0</h2>
+                </div>
+                <div class="kpi-card" style="background-color: #28a745;">
+                    <h3>Cliente Principal</h3>
+                    <h2 id="kpi-top-client-name" style="font-size: 1.1em; margin-top:15px; text-transform: uppercase;">-</h2>
+                    <h3 id="kpi-top-client-val" style="margin-top: 5px; font-weight:bold;">0 kg</h3>
+                </div>
+                <div class="kpi-card" style="background-color: #17a2b8;">
+                    <h3>Número Total de Rutas</h3>
+                    <h2 id="kpi-total-rutas">0</h2>
+                </div>
+            </div>
+
+            <!-- VELOCÍMETRO UNIFICADO -->
+            <div class="chart-row" style="justify-content: center;">
+                <div class="chart-container" style="background:white; border-radius:8px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); max-width: 800px; width: 100%; flex: none;">
+                    <div style="text-align: center; padding-top: 20px;">
+                        <label for="toggle-gauge" style="font-size: 1.1em; font-weight: bold; color: #0055a5; margin-right: 10px;">Ver indicador:</label>
+                        <select id="toggle-gauge" onchange="updateGauge()" style="padding: 8px 15px; border-radius: 4px; border: 1px solid #0055a5; font-size: 1.05em; font-weight: bold; color: #333; outline: none; background: #eef5fb; cursor: pointer;">
+                            <option value="kg">Total Kilogramos</option>
+                            <option value="despacho">Total Despachado</option>
+                        </select>
+                    </div>
+                    <div id="gauge-unified" style="height:380px; width:100%;"></div>
+                </div>
+            </div>
+
+            <!-- TOP 10 MENSUAL -->
+            <div class="chart-row">
+                <div class="chart-container">
+                    <div id="chart-top-clientes" class="plotly-graph-div" style="height:320px; width:100%; padding-top:10px;"></div>
+                </div>
+                <div class="chart-container">
+                    <div id="chart-top-productos" class="plotly-graph-div" style="height:320px; width:100%; padding-top:10px;"></div>
+                </div>
+            </div>
+
+            <!-- MAPA GEOESPACIAL Y PIE DE ZONAS -->
+            <div class="chart-row">
+                <div class="chart-container">
+                    <div id="chart-mapa-ecuador" class="plotly-graph-div" style="height:400px; width:100%; padding-top:10px;"></div>
+                </div>
+                <div class="chart-container">
+                    <div id="chart-pie-zonas" class="plotly-graph-div" style="height:400px; width:100%; padding-top:10px;"></div>
+                </div>
+            </div>
+
+            <!-- GRAFICOS DE BARRAS DE ZONAS Y VEHÍCULOS -->
+            <div class="chart-row">
+                <div class="chart-container">
+                    <div id="chart-rutas-zona" class="plotly-graph-div" style="height:350px; width:100%; padding-top:10px;"></div>
+                </div>
+                <div class="chart-container">
+                    <div id="chart-vehiculos-ruta" class="plotly-graph-div" style="height:350px; width:100%; padding-top:10px;"></div>
+                </div>
+            </div>
+
+            <div class="chart-row full-width">
+                <div class="full-width">
+                    <div id="chart-linea-fechas" class="plotly-graph-div" style="height:350px; width:100%; padding-top:10px;"></div>
+                </div>
+            </div>
+
+            <!-- SECCION PROGRAMADOS FECHA SELECCIONADA -->
+            <div class='table-wrapper' style='margin-top: 40px;'>
+                <h2 id="titulo-programados" style="margin-bottom: 20px; text-align: center; color: #155724;">Despachos Programados</h2>
+                
+                <!-- BOTONES DE FILTRO POR ORIGEN -->
+                <div style="margin-bottom: 15px;">
+                    <div class='tab-buttons' id="origen-buttons-programados"></div>
+                </div>
+
+                <div class="chart-row">
+                    <div class="full-width" style="margin-bottom: 20px;">
+                        <div id="chart-pie-programados" class="plotly-graph-div" style="height:350px; width:100%; padding-top:10px;"></div>
+                    </div>
+                </div>
+                <div class='table-container' style='max-height: none;'>
+                    <table class="green-table" style='border-left: 3px solid #28a745;'>
+                        <thead>
+                            <tr>
+                                <th style="white-space: nowrap;">Fecha Despacho<br><input type="text" class="table-filter-input" data-col="0" onkeyup="filterTableDOM('tbody-despachos-programados', 6)" placeholder="Buscar..."></th>
+                                <th>Origen<br><input type="text" class="table-filter-input" data-col="1" onkeyup="filterTableDOM('tbody-despachos-programados', 6)" placeholder="Buscar..."></th>
+                                <th>Destino<br><input type="text" class="table-filter-input" data-col="2" onkeyup="filterTableDOM('tbody-despachos-programados', 6)" placeholder="Buscar..."></th>
+                                <th>Zona<br><input type="text" class="table-filter-input" data-col="3" onkeyup="filterTableDOM('tbody-despachos-programados', 6)" placeholder="Buscar..."></th>
+                                <th>Cliente<br><input type="text" class="table-filter-input" data-col="4" onkeyup="filterTableDOM('tbody-despachos-programados', 6)" placeholder="Buscar..."></th>
+                                <th>Descripción<br><input type="text" class="table-filter-input" data-col="5" onkeyup="filterTableDOM('tbody-despachos-programados', 6)" placeholder="Buscar..."></th>
+                                <th style="text-align: right;">KG (A Despachar)<br><input type="text" class="table-filter-input" data-col="6" onkeyup="filterTableDOM('tbody-despachos-programados', 6)" placeholder="Buscar..."></th>
+                                <th>SKU<br><input type="text" class="table-filter-input" data-col="7" onkeyup="filterTableDOM('tbody-despachos-programados', 6)" placeholder="Buscar..."></th>
+                                <th>Líneas del pedido<br><input type="text" class="table-filter-input" data-col="8" onkeyup="filterTableDOM('tbody-despachos-programados', 6)" placeholder="Buscar..."></th>
+                                <th>Vehículo<br><input type="text" class="table-filter-input" data-col="9" onkeyup="filterTableDOM('tbody-despachos-programados', 6)" placeholder="Buscar..."></th>
+                                <th style="text-align: center;">Status<br><input type="text" class="table-filter-input" data-col="10" onkeyup="filterTableDOM('tbody-despachos-programados', 6)" placeholder="Buscar..."></th>
+                                <th>Novedad<br><input type="text" class="table-filter-input" data-col="11" onkeyup="filterTableDOM('tbody-despachos-programados', 6)" placeholder="Buscar..."></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-despachos-programados"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TABLA GENERAL DESPACHOS -->
+            <div class="table-wrapper" style='margin-top: 50px;'>
+                <h2 style="margin-bottom: 10px; text-align: center; color: #0055a5;">Detalle General de Despachos</h2>
+                
+                <!-- FILTRO DE SEMANA EXCLUSIVO -->
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <label for="filter-semana-tabla" style="font-weight: bold; color: #0055a5; font-size: 1.1em; margin-right: 10px;">Filtrar por Semana (Calendario Anual):</label>
+                    <select id="filter-semana-tabla" onchange="updateTablaGeneral()" style="padding: 8px 15px; border-radius: 4px; border: 1px solid #0055a5; font-size: 1em; font-weight: bold; color: #333; outline: none; background: #eef5fb; cursor: pointer;">
+                        <option value="ALL">Todas las Semanas</option>
+                    </select>
+                </div>
+
+                <div class='table-container'>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="white-space: nowrap;">Fecha Despacho<br><input type="text" class="table-filter-input" data-col="0" onkeyup="filterTableDOM('tbody-despachos-general', 6)" placeholder="Buscar..."></th>
+                                <th>Origen<br><input type="text" class="table-filter-input" data-col="1" onkeyup="filterTableDOM('tbody-despachos-general', 6)" placeholder="Buscar..."></th>
+                                <th>Destino<br><input type="text" class="table-filter-input" data-col="2" onkeyup="filterTableDOM('tbody-despachos-general', 6)" placeholder="Buscar..."></th>
+                                <th>Zona<br><input type="text" class="table-filter-input" data-col="3" onkeyup="filterTableDOM('tbody-despachos-general', 6)" placeholder="Buscar..."></th>
+                                <th>Cliente<br><input type="text" class="table-filter-input" data-col="4" onkeyup="filterTableDOM('tbody-despachos-general', 6)" placeholder="Buscar..."></th>
+                                <th>Descripción<br><input type="text" class="table-filter-input" data-col="5" onkeyup="filterTableDOM('tbody-despachos-general', 6)" placeholder="Buscar..."></th>
+                                <th style="text-align: right;">KG<br><input type="text" class="table-filter-input" data-col="6" onkeyup="filterTableDOM('tbody-despachos-general', 6)" placeholder="Buscar..."></th>
+                                <th>SKU<br><input type="text" class="table-filter-input" data-col="7" onkeyup="filterTableDOM('tbody-despachos-general', 6)" placeholder="Buscar..."></th>
+                                <th>Líneas del pedido<br><input type="text" class="table-filter-input" data-col="8" onkeyup="filterTableDOM('tbody-despachos-general', 6)" placeholder="Buscar..."></th>
+                                <th>Vehículo<br><input type="text" class="table-filter-input" data-col="9" onkeyup="filterTableDOM('tbody-despachos-general', 6)" placeholder="Buscar..."></th>
+                                <th style="text-align: center;">Status<br><input type="text" class="table-filter-input" data-col="10" onkeyup="filterTableDOM('tbody-despachos-general', 6)" placeholder="Buscar..."></th>
+                                <th>Novedad<br><input type="text" class="table-filter-input" data-col="11" onkeyup="filterTableDOM('tbody-despachos-general', 6)" placeholder="Buscar..."></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-despachos-general"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MODULO RECEPCIONES -->
+            <div class='table-wrapper' style='margin-top: 60px; padding-top: 30px; border-top: 2px dashed #ccc;'>
+                <h2 style="margin-bottom: 20px; text-align: center; color: #6f42c1;">Módulo de Recepciones</h2>
+                <div class="chart-row">
+                    <div class="chart-container">
+                        <div id="chart-recepciones-fechas" class="plotly-graph-div" style="height:350px; width:100%; padding-top:10px;"></div>
+                    </div>
+                    <div class="chart-container">
+                        <div id="chart-recepciones-destino-pie" class="plotly-graph-div" style="height:350px; width:100%; padding-top:10px;"></div>
+                    </div>
+                </div>
+
+                <div class="chart-row" style="justify-content: center; margin-top: 20px;">
+                    <div class="chart-container" style="width: 70%;">
+                        <div id="chart-recepciones-barras-dia" class="plotly-graph-div" style="height:350px; width:100%; padding-top:10px;"></div>
+                    </div>
+                </div>
+
+                <h3 id="titulo-tabs-recepcion" style="text-align: center; color: #6f42c1; margin-top: 40px;">Vista Dinámica por Destino</h3>
+                <div style="margin-bottom: 40px;">
+                    <div class='tab-buttons' id="tab-buttons-container"></div>
+                    <div id="tab-contents-container"></div>
+                </div>
+
+                <h3 id="titulo-detalle-recepcion" style="text-align: center; color: #6f42c1; margin-top: 40px;">Detalle General de Recepciones</h3>
+                <div class='table-container' style='max-height: none;'>
+                    <table style='border-left: 3px solid #6f42c1;'>
+                        <thead style='background-color: #6f42c1;'>
+                            <tr>
+                                <th style='background-color: #6f42c1;'>FECHA</th>
+                                <th style='background-color: #6f42c1;'>IMPORTACION</th>
+                                <th style='background-color: #6f42c1;'>DESTINO</th>
+                                <th style='background-color: #6f42c1;'>PRODUCTO</th>
+                                <th style='background-color: #6f42c1; text-align: right;'>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-recepciones-dia"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    <!-- ESTRUCTURA DEL MODAL NIVEL DE SERVICIO -->
+    <div id="modal-ns" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModalNs()">&times;</span>
+            <h2 style="color: #6f42c1; text-align: center; margin-top: 0;">Niveles de Servicio por debajo del 100%</h2>
+            <div class="table-container" style="max-height: 500px; border-left: 3px solid #6f42c1;">
+                <table>
+                    <thead style="background-color: #6f42c1;">
+                        <tr>
+                            <th style="background-color: #6f42c1;">Cliente</th>
+                            <th style="background-color: #6f42c1;">Descripción</th>
+                            <th style="background-color: #dc3545; text-align: center;">Nivel de Servicio</th>
+                            <th style="background-color: #6f42c1; text-align: center;">Status</th>
+                            <th style="background-color: #6f42c1; text-align: right;">KG Despachado</th>
+                            <th style="background-color: #6f42c1;">Novedad</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-modal-ns">
+                        <!-- Llenado dinámico mediante JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWjVS7CIRDeWCcswsHZ9rUDdPq5gPY63sDluV2zFkEsblCVR66hkpchoc898UdPtVO/exec";
+        
+        let globalDespachos = [];
+        let currentFilteredDespachos = [];
+        let globalRecepciones = [];
+        let globalFechaActual = '';
+        let filtersPopulated = false;
+
+        let currentGaugeKg = 0;
+        let currentGaugeDesp = 0;
+        
+        let currentProgOrigen = 'ALL';
+
+        const brandColors = ["#0055a5", "#0085ca", "#8fc7e8", "#e3a833", "#28a745", "#dc3545", "#6c757d"];
+        const dynamicBarColors = ["#007bff", "#28a745", "#dc3545", "#ffc107", "#17a2b8", "#6f42c1", "#fd7e14", "#20c997", "#e83e8c", "#6610f2", "#343a40", "#0055a5"];
+
+        const geoCoords = {
+            "QUITO": {lat: -0.2298, lon: -78.5249},
+            "DURAN": {lat: -2.1701, lon: -79.8220},
+            "GUAYAQUIL": {lat: -2.1894, lon: -79.8891},
+            "MANABI": {lat: -1.0545, lon: -80.4544},
+            "BUENA FE": {lat: -0.8996, lon: -79.4893},
+            "CUENCA": {lat: -2.9001, lon: -79.0059},
+            "MACHALA": {lat: -3.2581, lon: -79.9554},
+            "SANTO DOMINGO": {lat: -0.2530, lon: -79.1753},
+            "MANTA": {lat: -0.9676, lon: -80.7127},
+            "ESMERALDAS": {lat: 0.9592, lon: -79.6539},
+            "AMBATO": {lat: -1.2416, lon: -78.6278},
+            "RIOBAMBA": {lat: -1.6650, lon: -78.6523},
+            "QUEVEDO": {lat: -1.0286, lon: -79.4635},
+            "LOJA": {lat: -3.9931, lon: -79.2042},
+            "IBARRA": {lat: 0.3392, lon: -78.1222},
+            "MILAGRO": {lat: -2.1333, lon: -79.5833},
+            "DAULE": {lat: -1.8622, lon: -79.9775},
+            "BABAHOYO": {lat: -1.8022, lon: -79.5344},
+            "NOBOL": {lat: -1.9056, lon: -80.0125},
+            "SAMBORONDON": {lat: -1.9567, lon: -79.7214},
+            "YAGUACHI": {lat: -2.0950, lon: -79.6958},
+            "NARANJAL": {lat: -2.6736, lon: -79.6183},
+            "EL TRIUNFO": {lat: -2.3333, lon: -79.4000},
+            "VENTANAS": {lat: -1.4411, lon: -79.4608},
+            "VINCES": {lat: -1.5542, lon: -79.7519},
+            "SANTA ELENA": {lat: -2.2262, lon: -80.8587},
+            "LA LIBERTAD": {lat: -2.2330, lon: -80.9088},
+            "SALINAS": {lat: -2.2145, lon: -80.9515},
+            "PLAYAS": {lat: -2.6285, lon: -80.3896},
+            "LATACUNGA": {lat: -0.9316, lon: -78.6158},
+            "NUEVA LOJA": {lat: 0.0847, lon: -76.8828},
+            "LAGO AGRIO": {lat: 0.0847, lon: -76.8828},
+            "COCA": {lat: -0.4667, lon: -76.9833},
+            "TENA": {lat: -0.9938, lon: -77.8129},
+            "PUYO": {lat: -1.4837, lon: -77.9954},
+            "MACAS": {lat: -2.3086, lon: -78.1114},
+            "TULCAN": {lat: 0.8118, lon: -77.7173},
+            "HUAQUILLAS": {lat: -3.4752, lon: -80.2314},
+            "PASAJE": {lat: -3.3256, lon: -79.8070},
+            "SANTA ROSA": {lat: -3.4536, lon: -79.9573},
+            "CHONE": {lat: -0.6983, lon: -80.0936},
+            "JIPIJAPA": {lat: -1.3469, lon: -80.5750},
+            "PORTOVIEJO": {lat: -1.0545, lon: -80.4544},
+            "EL CARMEN": {lat: -0.2689, lon: -79.4614},
+            "PEDERNALES": {lat: 0.0717, lon: -80.0519},
+            "PERU": {lat: -9.1900, lon: -75.0152}, 
+            "LIMA": {lat: -12.0464, lon: -77.0428},
+            "PIURA": {lat: -5.1945, lon: -80.6328},
+            "TUMBES": {lat: -3.5669, lon: -80.4515},
+            "CHICLAYO": {lat: -6.7714, lon: -79.8409},
+            "TRUJILLO": {lat: -8.1159, lon: -79.0258}
+        };
+
+        // ==========================================
+        // FUNCIONES AUXILIARES Y CÁLCULO DE SEMANAS
+        // ==========================================
+        function formatDateString(val) {
+            if (!val) return '';
+            if (typeof val === 'string' && val.includes('T')) return val.split('T')[0];
+            let d = new Date(val);
+            if (!isNaN(d.getTime())) {
+                let year = d.getFullYear();
+                let month = String(d.getMonth() + 1).padStart(2, '0');
+                let day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            return String(val).trim();
+        }
+
+        function getISOWeek(dateString) {
+            if (!dateString) return null;
+            let parts = dateString.split('-');
+            if (parts.length !== 3) return null;
+            
+            let d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+            let dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            let yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        function parseCleanNumber(val) {
+            if (val === null || val === undefined || val === '') return 0;
+            if (typeof val === 'number') return val;
+            
+            let str = String(val).trim();
+            str = str.replace(/[^0-9.,-]/g, '');
+            
+            if (str.includes('.') && str.includes(',')) {
+                let lastDot = str.lastIndexOf('.');
+                let lastComma = str.lastIndexOf(',');
+                if (lastComma > lastDot) {
+                    str = str.replace(/\./g, '').replace(',', '.');
+                } else {
+                    str = str.replace(/,/g, ''); 
+                }
+            } else if (str.includes(',')) {
+                str = str.replace(',', '.'); 
+            }
+            
+            let parsed = parseFloat(str);
+            return isNaN(parsed) ? 0 : parsed;
+        }
+
+        function getProp(obj, possibleKeys) {
+            if (!obj) return '';
+            const keys = Object.keys(obj);
+            for (let key of keys) {
+                let normalizedKey = key.trim().toLowerCase();
+                for (let pk of possibleKeys) {
+                    if (normalizedKey.includes(pk.toLowerCase())) return obj[key];
+                }
+            }
+            return '';
+        }
+
+        const fmtNumber = num => (Number(num) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const fmtInt = num => Math.round(Number(num) || 0).toLocaleString('en-US');
+
+        function getUniqueValues(data, keys) {
+            let values = new Set();
+            data.forEach(d => {
+                let val = getProp(d, keys);
+                if (val && String(val).trim() !== '') values.add(String(val).trim().toUpperCase());
+            });
+            return Array.from(values).sort();
+        }
+
+        function filterValidData(arr, numKeys) {
+            let filtered = arr.filter(d => {
+                for (let k in d) {
+                    let val = String(d[k]).trim().toUpperCase();
+                    if (val === 'TOTAL' || val === 'TOTALES' || val === 'TOTAL GENERAL') {
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            let sum = 0;
+            filtered.forEach(d => { sum += parseCleanNumber(getProp(d, numKeys)); });
+            
+            let half = sum / 2;
+            let totalRowIndex = filtered.findIndex(d => {
+                let val = parseCleanNumber(getProp(d, numKeys));
+                return val > 0 && Math.abs(val - half) < 0.01;
+            });
+            
+            if (totalRowIndex !== -1 && filtered.length > 1) {
+                filtered.splice(totalRowIndex, 1); 
+            }
+            
+            return filtered;
+        }
+
+        // ==========================================
+        // FUNCIÓN FILTRO DOM PARA COLUMNAS
+        // ==========================================
+        function filterTableDOM(tbodyId, kgColIdx) {
+            let tbody = document.getElementById(tbodyId);
+            if(!tbody) return;
+            let trs = tbody.getElementsByTagName("tr");
+            let thead = tbody.previousElementSibling;
+            let inputs = thead.querySelectorAll(".table-filter-input");
+
+            let visibleTotal = 0;
+
+            for (let i = 0; i < trs.length; i++) {
+                let tr = trs[i];
+                
+                if (tr.classList.contains("table-footer")) continue;
+
+                let displayStyle = "";
+                let tds = tr.getElementsByTagName("td");
+                
+                if(tds.length > 5) {
+                    inputs.forEach(input => {
+                        let colIdx = input.getAttribute("data-col");
+                        let filterValue = input.value.trim().toUpperCase();
+                        if (filterValue) {
+                            let tdText = tds[colIdx] ? tds[colIdx].textContent || tds[colIdx].innerText : "";
+                            if (tdText.toUpperCase().indexOf(filterValue) === -1) {
+                                displayStyle = "none";
+                            }
+                        }
+                    });
+                    
+                    tr.style.display = displayStyle;
+                    
+                    if (displayStyle !== "none") {
+                        let kgText = tds[kgColIdx].innerText || tds[kgColIdx].textContent;
+                        visibleTotal += parseCleanNumber(kgText);
+                    }
+                }
+            }
+
+            let footerTotalTd = tbody.parentElement.querySelector(".table-footer .footer-total-val");
+            if (footerTotalTd) {
+                footerTotalTd.innerText = fmtNumber(visibleTotal);
+            }
+        }
+
+
+        // ==========================================
+        // CARGA PRINCIPAL
+        // ==========================================
+        async function initDashboard() {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?t=${new Date().getTime()}`);
+                const data = await response.json();
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('filter-section').style.display = 'flex';
+
+                globalDespachos = filterValidData(data.despachos || [], ['Kilogramos', 'KG', 'Solicitados']);
+                globalRecepciones = filterValidData(data.recepciones || [], ['Total', 'Kilogramos', 'Cantidad']);
+
+                if (globalDespachos.length === 0 && globalRecepciones.length === 0) {
+                    console.warn("No se encontraron registros.");
+                    return;
+                }
+
+                const fechasDespacho = [...new Set(globalDespachos.map(d => formatDateString(getProp(d, ['Fecha Despacho', 'Fecha']))))].filter(Boolean).sort();
+                globalFechaActual = fechasDespacho[fechasDespacho.length - 1] || '';
+
+                if(!filtersPopulated) {
+                    populateFilters();
+                    filtersPopulated = true;
+                }
+
+                applyFilters();
+
+            } catch (error) {
+                console.error("Error al cargar datos:", error);
+                const loadingElem = document.getElementById('loading');
+                if (loadingElem) loadingElem.innerText = "Error al conectar con Google Sheets.";
+            }
+        }
+
+        // ==========================================
+        // FILTROS GLOBALES
+        // ==========================================
+        function populateFilters() {
+            const mSelect = document.getElementById('filter-mes');
+            const zSelect = document.getElementById('filter-zona');
+            const dSelect = document.getElementById('filter-destino');
+            const cSelect = document.getElementById('filter-cliente');
+            const skuSelect = document.getElementById('filter-sku');
+            const sSelect = document.getElementById('filter-status');
+            const nSelect = document.getElementById('filter-novedad');
+
+            const addOptions = (selectElem, values) => {
+                values.forEach(v => {
+                    let opt = document.createElement('option');
+                    opt.value = v; 
+                    opt.innerHTML = v;
+                    selectElem.appendChild(opt);
+                });
+            };
+
+            let mesesSet = new Set();
+            globalDespachos.forEach(d => {
+                let f = formatDateString(getProp(d, ['Fecha Despacho', 'Fecha']));
+                if(f && f.length >= 7) mesesSet.add(f.substring(0,7));
+            });
+            let mesesArr = Array.from(mesesSet).sort().reverse();
+            mSelect.innerHTML = '<option value="">Todos los Meses</option>';
+            mesesArr.forEach(m => {
+                let opt = document.createElement('option');
+                opt.value = m;
+                opt.innerHTML = m;
+                mSelect.appendChild(opt);
+            });
+
+            addOptions(zSelect, getUniqueValues(globalDespachos, ['Zona']));
+            addOptions(dSelect, getUniqueValues(globalDespachos, ['Destino', 'DESTINO']));
+            addOptions(cSelect, getUniqueValues(globalDespachos, ['Cliente', 'Cliente Principal']));
+            addOptions(skuSelect, getUniqueValues(globalDespachos, ['SKU', 'Sku', 'sku']));
+            addOptions(sSelect, getUniqueValues(globalDespachos, ['Status', 'Estado', 'Estatus']));
+            addOptions(nSelect, getUniqueValues(globalDespachos, ['Novedad', 'Novedades', 'Observación', 'Observaciones']));
+        }
+
+        function clearFilters() {
+            document.getElementById('filter-mes').value = '';
+            document.getElementById('filter-zona').value = '';
+            document.getElementById('filter-destino').value = '';
+            document.getElementById('filter-cliente').value = '';
+            document.getElementById('filter-sku').value = '';
+            document.getElementById('filter-status').value = '';
+            document.getElementById('filter-novedad').value = '';
+            applyFilters();
+        }
+
+        function applyFilters() {
+            let fMes = document.getElementById('filter-mes').value;
+            let fZona = document.getElementById('filter-zona').value;
+            let fDestino = document.getElementById('filter-destino').value;
+            let fCliente = document.getElementById('filter-cliente').value;
+            let fSku = document.getElementById('filter-sku').value;
+            let fStatus = document.getElementById('filter-status').value;
+            let fNovedad = document.getElementById('filter-novedad').value;
+
+            currentProgOrigen = 'ALL';
+
+            currentFilteredDespachos = globalDespachos.filter(d => {
+                let fechaStr = formatDateString(getProp(d, ['Fecha Despacho', 'Fecha']));
+                let vZona = String(getProp(d, ['Zona'])).trim().toUpperCase();
+                let vDest = String(getProp(d, ['Destino', 'DESTINO'])).trim().toUpperCase();
+                let vClie = String(getProp(d, ['Cliente', 'Cliente Principal'])).trim().toUpperCase();
+                let vSku = String(getProp(d, ['SKU', 'Sku', 'sku'])).trim().toUpperCase();
+                let vStat = String(getProp(d, ['Status', 'Estado', 'Estatus'])).trim().toUpperCase();
+                let vNove = String(getProp(d, ['Novedad', 'Novedades', 'Observación', 'Observaciones'])).trim().toUpperCase();
+
+                let matchMes = fMes === '' || fechaStr.startsWith(fMes);
+                let matchZona = fZona === '' || vZona === fZona;
+                let matchDest = fDestino === '' || vDest === fDestino;
+                let matchClie = fCliente === '' || vClie === fCliente;
+                let matchSku = fSku === '' || vSku === fSku;
+                let matchStat = fStatus === '' || vStat === fStatus;
+                let matchNove = fNovedad === '' || vNove === fNovedad;
+
+                return matchMes && matchZona && matchDest && matchClie && matchSku && matchStat && matchNove;
+            });
+
+            renderAll(currentFilteredDespachos, globalRecepciones, globalFechaActual);
+        }
+
+        // ==========================================
+        // RENDERIZADO VISUAL
+        // ==========================================
+        function renderAll(despachos, recepciones, fechaActual) {
+            renderKPIs(despachos);
+            renderTop10Charts(despachos, fechaActual);
+            
+            currentGaugeKg = despachos.reduce((sum, d) => sum + parseCleanNumber(getProp(d, ['Kilogramos', 'KG', 'Solicitados'])), 0);
+            currentGaugeDesp = despachos.reduce((sum, d) => sum + parseCleanNumber(getProp(d, ['Despachado', 'A Despachar', 'Entregado', 'KG (A Despachar)'])), 0);
+            if (currentGaugeDesp === 0 && currentGaugeKg > 0) currentGaugeDesp = currentGaugeKg; 
+            updateGauge(); 
+
+            renderMapEcuador(despachos);
+            renderGraficosDespachos(despachos, fechaActual, brandColors);
+            renderGraficoVehiculosPorRuta(despachos);
+            
+            // Render Programados primero
+            renderDespachosProgramados(despachos, fechaActual);
+            
+            // Render General despues
+            populateWeekFilter(despachos);
+            renderTablaDespachosGeneral(despachos);
+            
+            renderModuloRecepciones(recepciones, fechaActual);
+        }
+
+        function renderKPIs(despachos) {
+            let totalKg = 0;
+            let clienteMap = {};
+            let pedidosSet = new Set(); 
+
+            despachos.forEach(d => {
+                let rawKg = getProp(d, ['Kilogramos', 'KG', 'Solicitados', 'Cantidad']);
+                let kg = parseCleanNumber(rawKg);
+                totalKg += kg;
+
+                let cliente = String(getProp(d, ['Cliente', 'Cliente Principal']) || 'SIN CLIENTE').trim();
+                if (cliente && cliente !== 'SIN CLIENTE') {
+                    clienteMap[cliente] = (clienteMap[cliente] || 0) + kg;
+                }
+
+                let pedido = String(getProp(d, ['N. Pedido', 'N Pedido', 'Pedido', 'Orden', 'Líneas del pedido', 'Lineas del pedido', 'Líneas', 'Lineas'])).trim();
+                if (pedido && pedido !== '') {
+                    pedidosSet.add(pedido);
+                }
+            });
+
+            let topCliente = "-";
+            let maxKg = -1;
+            for (let c in clienteMap) {
+                if (clienteMap[c] > maxKg) {
+                    maxKg = clienteMap[c];
+                    topCliente = c;
+                }
+            }
+
+            document.getElementById('kpi-total-kg').innerText = fmtNumber(totalKg) + " kg";
+            document.getElementById('kpi-total-pedidos').innerText = pedidosSet.size > 0 ? fmtInt(pedidosSet.size) : fmtInt(despachos.length);
+            document.getElementById('kpi-top-client-name').innerText = topCliente;
+            document.getElementById('kpi-top-client-val').innerText = fmtNumber(maxKg > 0 ? maxKg : 0) + " kg";
+            document.getElementById('kpi-total-rutas').innerText = despachos.length;
+        }
+
+        function renderTop10Charts(despachos, fechaActual) {
+            if (!fechaActual) return;
+            
+            const currentMonthPrefix = fechaActual.substring(0, 7); 
+
+            let clientesMap = {};
+            let productosMap = {};
+
+            despachos.forEach(d => {
+                let fecha = formatDateString(getProp(d, ['Fecha Despacho', 'Fecha']));
+                if (fecha.startsWith(currentMonthPrefix)) {
+
+                    let kg = parseCleanNumber(getProp(d, ['Kilogramos', 'KG', 'Solicitados']));
+                    
+                    let cliente = String(getProp(d, ['Cliente', 'Cliente Principal']) || 'SIN CLIENTE').trim();
+                    let descripcion = String(getProp(d, ['Descripción', 'Descripcion', 'descripción', 'descripcion', 'Desc']) || 'SIN DESCRIPCION').trim();
+
+                    if (kg > 0) {
+                        clientesMap[cliente] = (clientesMap[cliente] || 0) + kg;
+                        productosMap[descripcion] = (productosMap[descripcion] || 0) + kg;
+                    }
+                }
+            });
+
+            let topClientes = Object.entries(clientesMap).sort((a, b) => b[1] - a[1]).slice(0, 10);
+            let topProductos = Object.entries(productosMap).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+            topClientes.reverse();
+            topProductos.reverse();
+
+            const truncateStr = (str, n) => str.length > n ? str.substr(0, n - 3) + '...' : str;
+
+            let clientesX = topClientes.map(c => c[1]);
+            let clientesY = topClientes.map((c, i) => truncateStr(c[0], 25) + "\u200B".repeat(i)); 
+            let hoverClientes = topClientes.map(c => `<b>${c[0]}</b><br>${fmtNumber(c[1])} kg`);
+
+            let traceClientes = {
+                x: clientesX,
+                y: clientesY,
+                type: 'bar',
+                orientation: 'h',
+                marker: { color: '#0055a5' },
+                hovertext: hoverClientes,
+                hoverinfo: 'text'
+            };
+
+            Plotly.newPlot('chart-top-clientes', [traceClientes], {
+                title: 'Top 10 Clientes (Mes Actual)',
+                margin: { l: 200, r: 30, t: 50, b: 40 }, 
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                xaxis: { title: 'Kilogramos' },
+                yaxis: { automargin: true, tickfont: { size: 11 }, categoryorder: 'total ascending' }
+            }, {responsive: true});
+
+            let prodX = topProductos.map(p => p[1]);
+            let prodY = topProductos.map((p, i) => truncateStr(p[0], 45) + "\u200B".repeat(i));
+            let hoverProd = topProductos.map(p => `<b>${p[0]}</b><br>${fmtNumber(p[1])} kg`);
+
+            let traceProductos = {
+                x: prodX,
+                y: prodY,
+                type: 'bar',
+                orientation: 'h',
+                marker: { color: '#28a745' },
+                hovertext: hoverProd,
+                hoverinfo: 'text'
+            };
+
+            Plotly.newPlot('chart-top-productos', [traceProductos], {
+                title: 'Top 10 Productos con mayor despacho (Mes Actual)',
+                margin: { l: 280, r: 30, t: 50, b: 40 }, 
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                xaxis: { title: 'Kilogramos' },
+                yaxis: { automargin: true, tickfont: { size: 11 }, categoryorder: 'total ascending' }
+            }, {responsive: true});
+        }
+
+        // ==========================================
+        // VELOCÍMETRO UNIFICADO ECHARTS
+        // ==========================================
+        function updateGauge() {
+            let metric = document.getElementById('toggle-gauge').value;
+            let val = metric === 'kg' ? currentGaugeKg : currentGaugeDesp;
+
+            let chartDom = document.getElementById('gauge-unified');
+            let chart = echarts.getInstanceByDom(chartDom) || echarts.init(chartDom);
+            
+            chart.setOption({
+                series: [{
+                    type: 'gauge',
+                    startAngle: 180,
+                    endAngle: 0,
+                    min: 0,
+                    max: 1200000,
+                    splitNumber: 12, 
+                    radius: '100%',
+                    center: ['50%', '75%'],
+                    axisLine: {
+                        lineStyle: {
+                            width: 35,
+                            color: [
+                                [0.333, '#28a745'], 
+                                [0.666, '#ffc107'], 
+                                [1, '#dc3545']      
+                            ]
+                        }
+                    },
+                    pointer: {
+                        length: '65%',
+                        width: 8,
+                        offsetCenter: [0, '-5%'],
+                        itemStyle: { color: '#464646' }
+                    },
+                    axisTick: {
+                        distance: -35,
+                        length: 8,
+                        lineStyle: { color: '#fff', width: 2 }
+                    },
+                    splitLine: {
+                        distance: -35,
+                        length: 35,
+                        lineStyle: { color: '#fff', width: 3 }
+                    },
+                    axisLabel: {
+                        distance: 35,
+                        color: '#333',
+                        fontSize: 10,
+                        formatter: function (value) {
+                            return value === 0 ? '0' : (value / 1000) + 'k';
+                        }
+                    },
+                    detail: {
+                        fontSize: 45,
+                        offsetCenter: [0, '25%'],
+                        valueAnimation: true,
+                        formatter: function (value) {
+                            return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        },
+                        color: '#333',
+                        fontWeight: 'bold'
+                    },
+                    data: [{ value: val }]
+                }]
+            });
+
+            window.addEventListener('resize', function() { chart.resize(); });
+        }
+
+        // ==========================================
+        // MAPA DE ECUADOR Y PERÚ
+        // ==========================================
+        function renderMapEcuador(despachos) {
+            let zonasMap = {};
+
+            despachos.forEach(d => {
+                let dest = String(getProp(d, ['Destino', 'DESTINO'])).trim().toUpperCase();
+                let zona = String(getProp(d, ['Zona'])).trim().toUpperCase() || 'OTRO';
+                let kg = parseCleanNumber(getProp(d, ['Kilogramos', 'KG', 'Solicitados']));
+                
+                if (dest && kg > 0) {
+                    if (!zonasMap[zona]) zonasMap[zona] = {};
+                    zonasMap[zona][dest] = (zonasMap[zona][dest] || 0) + kg;
+                }
+            });
+
+            let traces = [];
+            let zColors = {"COSTA": "#0055a5", "EXPORTACION": "#0085ca", "ORIENTE": "#e3a833", "SIERRA": "#28a745"};
+
+            Object.keys(zonasMap).forEach((zona, zIndex) => {
+                let lats = [];
+                let lons = [];
+                let hoverTexts = [];
+                let sizes = [];
+
+                Object.keys(zonasMap[zona]).forEach((dest) => {
+                    let coords = geoCoords[dest];
+                    
+                    if (!coords) {
+                        let hash = 0;
+                        for (let i = 0; i < dest.length; i++) hash = dest.charCodeAt(i) + ((hash << 5) - hash);
+                        let latOffset = (Math.abs(hash) % 20) / 10 - 1.0; 
+                        let lonOffset = (Math.abs(hash >> 2) % 20) / 10 - 1.0;
+                        coords = { lat: -1.5 + latOffset, lon: -78.5 + lonOffset };
+                    }
+
+                    let kg = zonasMap[zona][dest];
+                    lats.push(coords.lat);
+                    lons.push(coords.lon);
+                    
+                    hoverTexts.push(`<b>${dest}</b><br>Zona: ${zona}<br>${fmtNumber(kg)} kg`);
+                    sizes.push(Math.max(10, Math.min(50, Math.sqrt(kg) / 3)));
+                });
+
+                traces.push({
+                    type: 'scattergeo',
+                    mode: 'markers',
+                    name: zona,
+                    lat: lats,
+                    lon: lons,
+                    hoverinfo: 'text',
+                    hovertext: hoverTexts,
+                    marker: {
+                        size: sizes,
+                        sizemode: 'diameter',
+                        color: zColors[zona] || dynamicBarColors[zIndex % dynamicBarColors.length],
+                        line: { color: '#ffffff', width: 1.5 },
+                        opacity: 0.8
+                    }
+                });
+            });
+
+            let layout = {
+                title: 'Destinos de Despacho (Ecuador y Perú)',
+                geo: {
+                    scope: 'south america',
+                    resolution: 50,
+                    center: { lat: -7.0, lon: -76.5 }, 
+                    projection: { type: 'mercator', scale: 5.2 }, 
+                    showland: true,
+                    landcolor: '#e6edf5',
+                    countrycolor: '#b3d4fc',
+                    showborders: true,
+                    showcoastlines: true,
+                    coastlinecolor: '#0055a5'
+                },
+                margin: { t: 50, b: 10, l: 10, r: 10 },
+                paper_bgcolor: 'transparent',
+                legend: { orientation: "h", y: -0.1 }
+            };
+
+            Plotly.newPlot('chart-mapa-ecuador', traces, layout, {responsive: true});
+        }
+
+        function renderGraficosDespachos(despachos, fechaActual, brandColors) {
+            let zonasRutas = {};
+            let zonasKg = {};
+
+            despachos.forEach(d => {
+                let z = String(getProp(d, ['Zona']) || 'OTRO').trim().toUpperCase();
+                let kg = parseCleanNumber(getProp(d, ['Kilogramos', 'KG', 'Solicitados']));
+                zonasRutas[z] = (zonasRutas[z] || 0) + 1;
+                zonasKg[z] = (zonasKg[z] || 0) + kg;
+            });
+
+            let zKeys = Object.keys(zonasRutas).sort();
+            let zColors = {"COSTA": "#0055a5", "EXPORTACION": "#0085ca", "ORIENTE": "#e3a833", "SIERRA": "#28a745"};
+
+            let dataBarRutas = zKeys.map((z, index) => ({
+                x: [z], y: [zonasRutas[z]], name: z, type: 'bar',
+                marker: { color: zColors[z] || dynamicBarColors[index % dynamicBarColors.length] }
+            }));
+            
+            Plotly.newPlot('chart-rutas-zona', dataBarRutas, { title: 'Cantidad de Rutas por Zona', barmode: 'relative', paper_bgcolor: 'transparent', plot_bgcolor: 'transparent' }, {responsive: true});
+
+            let dataPieZonas = [{
+                labels: Object.keys(zonasKg),
+                values: Object.values(zonasKg),
+                type: 'pie', hole: 0.4,
+                marker: { colors: brandColors }
+            }];
+            Plotly.newPlot('chart-pie-zonas', dataPieZonas, { title: 'Proporción de kg despachados x zona', paper_bgcolor: 'transparent', plot_bgcolor: 'transparent' }, {responsive: true});
+
+            let fechasMap = {};
+            despachos.forEach(d => {
+                let f = formatDateString(getProp(d, ['Fecha Despacho', 'Fecha']));
+                let kg = parseCleanNumber(getProp(d, ['Kilogramos', 'KG', 'Solicitados']));
+                if (f) fechasMap[f] = (fechasMap[f] || 0) + kg;
+            });
+            let fKeys = Object.keys(fechasMap).sort();
+            
+            let dataLinea = [{
+                x: fKeys, y: fKeys.map(f => fechasMap[f]),
+                type: 'scatter', mode: 'lines+markers', line: { color: '#0055a5', width: 3 }, marker: {size: 8}
+            }];
+            Plotly.newPlot('chart-linea-fechas', dataLinea, { 
+                title: 'Comparativa Diaria de KG Despachados', 
+                xaxis: { title: 'Fecha', type: 'category', tickangle: -45 }, 
+                yaxis: { title: 'KG Despachados' }, 
+                paper_bgcolor: 'transparent', 
+                plot_bgcolor: 'transparent',
+                margin: { b: 80 }
+            }, {responsive: true});
+        }
+
+        function renderGraficoVehiculosPorRuta(despachos) {
+            let vehiculosRutaMap = {};
+            let tiposVehiculos = new Set();
+            let rutas = new Set();
+
+            despachos.forEach(d => {
+                let ruta = getProp(d, ['Destino', 'Zona', 'Ruta']) || 'SIN RUTA';
+                let vehiculo = getProp(d, ['Vehiculo', 'Vehículo', 'Tipo Vehiculo']) || 'NO ESPECIFICADO';
+                vehiculo = vehiculo.toString().trim().toUpperCase();
+                ruta = ruta.toString().trim().toUpperCase();
+
+                tiposVehiculos.add(vehiculo);
+                rutas.add(ruta);
+                if (!vehiculosRutaMap[vehiculo]) vehiculosRutaMap[vehiculo] = {};
+                vehiculosRutaMap[vehiculo][ruta] = (vehiculosRutaMap[vehiculo][ruta] || 0) + 1;
+            });
+
+            let arrRutas = Array.from(rutas).sort();
+            let dataTraces = [];
+
+            Array.from(tiposVehiculos).forEach((v, index) => {
+                let yValues = arrRutas.map(r => vehiculosRutaMap[v][r] || 0);
+                dataTraces.push({ x: arrRutas, y: yValues, name: v, type: 'bar', marker: {color: dynamicBarColors[index % dynamicBarColors.length]} });
+            });
+
+            Plotly.newPlot('chart-vehiculos-ruta', dataTraces, { title: 'Tipos de Vehículos Utilizados por Ruta / Destino', barmode: 'stack', xaxis: { title: 'Ruta / Destino' }, yaxis: { title: 'Cantidad de Despachos' }, paper_bgcolor: 'transparent', plot_bgcolor: 'transparent' }, {responsive: true});
+        }
+
+        // ==========================================
+        // TABLA DESPACHOS PROGRAMADOS (MOVIDA ARRIBA)
+        // ==========================================
+        function renderDespachosProgramados(despachos, fecha) {
+            const tituloElem = document.getElementById('titulo-programados');
+            if (tituloElem) tituloElem.innerText = `Despachos Programados: ${fecha}`;
+            
+            let progAll = despachos.filter(d => formatDateString(getProp(d, ['Fecha Despacho', 'Fecha'])) === fecha);
+
+            let origenes = [...new Set(progAll.map(d => String(getProp(d, ['Origen']) || 'SIN ORIGEN').trim().toUpperCase()))].sort();
+
+            let btnContainer = document.getElementById('origen-buttons-programados');
+            if (btnContainer) {
+                btnContainer.innerHTML = '';
+                
+                let btnAll = document.createElement('button');
+                btnAll.className = `tab-button ${currentProgOrigen === 'ALL' ? 'green-active' : ''}`;
+                btnAll.innerText = 'TOTAL GENERAL';
+                btnAll.onclick = () => { 
+                    currentProgOrigen = 'ALL'; 
+                    renderDespachosProgramados(despachos, fecha); 
+                };
+                btnContainer.appendChild(btnAll);
+
+                origenes.forEach(o => {
+                    let btn = document.createElement('button');
+                    btn.className = `tab-button ${currentProgOrigen === o ? 'green-active' : ''}`;
+                    btn.innerText = o;
+                    btn.onclick = () => { 
+                        currentProgOrigen = o; 
+                        renderDespachosProgramados(despachos, fecha); 
+                    };
+                    btnContainer.appendChild(btn);
+                });
+            }
+
+            let prog = progAll;
+            if (currentProgOrigen !== 'ALL') {
+                prog = progAll.filter(d => String(getProp(d, ['Origen']) || 'SIN ORIGEN').trim().toUpperCase() === currentProgOrigen);
+            }
+
+            prog.sort((a, b) => {
+                let oA = String(getProp(a, ['Origen']) || '-').trim().toUpperCase();
+                let oB = String(getProp(b, ['Origen']) || '-').trim().toUpperCase();
+                return oA.localeCompare(oB);
+            });
+
+            let tbody = document.getElementById('tbody-despachos-programados');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            
+            let total = 0;
+            let destinoZonaMap = {};
+
+            prog.forEach(d => {
+                let fechaClean = formatDateString(getProp(d, ['Fecha Despacho', 'Fecha']));
+                let origen = String(getProp(d, ['Origen']) || '-').trim().toUpperCase();
+                let destino = getProp(d, ['Destino']) || '-';
+                let zona = getProp(d, ['Zona']) || '-';
+                let cliente = getProp(d, ['Cliente', 'Cliente Principal']) || '-';
+                let descripcion = getProp(d, ['Descripción', 'Descripcion', 'descripción', 'descripcion', 'Desc']) || '-';
+                let kg = parseCleanNumber(getProp(d, ['Kilogramos', 'KG', 'Solicitados']));
+                let sku = getProp(d, ['SKU', 'Sku', 'sku']) || '-';
+                let lineasPedido = getProp(d, ['Líneas del pedido', 'Lineas del pedido', 'Líneas', 'Lineas', 'Pedido', 'Detalle']) || '-';
+                let vehiculo = getProp(d, ['Vehiculo', 'Vehículo']) || '-';
+                let status = getProp(d, ['Status', 'Estado', 'Estatus']) || '-';
+                let novedad = getProp(d, ['Novedad', 'Novedades', 'Observación', 'Observaciones']) || '-';
+                
+                total += kg;
+
+                let key = `${zona} - ${destino}`;
+                destinoZonaMap[key] = (destinoZonaMap[key] || 0) + kg;
+
+                let tr = `<tr>
+                    <td style="white-space: nowrap;">${fechaClean}</td>
+                    <td style="white-space: nowrap; font-weight:bold;">${origen}</td>
+                    <td style="white-space: nowrap;">${destino}</td>
+                    <td style="white-space: nowrap;">${zona}</td>
+                    <td>${cliente}</td>
+                    <td>${descripcion}</td>
+                    <td style="font-weight:bold; white-space: nowrap; text-align: right;">${fmtNumber(kg)}</td>
+                    <td style="white-space: nowrap;">${sku}</td>
+                    <td style="white-space: nowrap;">${lineasPedido}</td>
+                    <td style="white-space: nowrap;"><b>${vehiculo}</b></td>
+                    <td style="white-space: nowrap; text-align: center;"><span style="background:#d4edda; padding:4px 8px; border-radius:4px; font-weight:bold; color:#155724; font-size:0.9em;">${status}</span></td>
+                    <td>${novedad}</td>
+                </tr>`;
+                tbody.innerHTML += tr;
+            });
+
+            tbody.innerHTML += `<tr class='table-footer' style='background-color: #28a745; color: white;'>
+                <td colspan='6' style='text-align: right; padding-right: 15px; font-size: 1.1em; color: white;'>Total Visible (${fecha})</td>
+                <td class="footer-total-val" style='text-align: right; font-size: 1.1em; color: white;'>${fmtNumber(total)}</td>
+                <td colspan='5'></td>
+            </tr>`;
+
+            let titlePrefix = currentProgOrigen === 'ALL' ? 'General' : currentProgOrigen;
+            let dataPie = [{
+                labels: Object.keys(destinoZonaMap),
+                values: Object.values(destinoZonaMap),
+                type: 'pie', 
+                hole: 0.4,
+                textinfo: 'percent', 
+                hoverinfo: 'label+value+percent', 
+                marker: { colors: dynamicBarColors }
+            }];
+            Plotly.newPlot('chart-pie-programados', dataPie, { 
+                title: `Proporción de KG: ${titlePrefix} (${fecha})`, 
+                paper_bgcolor: 'transparent', 
+                plot_bgcolor: 'transparent' 
+            }, {responsive: true});
+
+            filterTableDOM('tbody-despachos-programados', 6);
+        }
+
+        // ==========================================
+        // TABLA GENERAL DE DESPACHOS (MOVIDA ABAJO)
+        // ==========================================
+        function populateWeekFilter(despachos) {
+            let weekSelect = document.getElementById('filter-semana-tabla');
+            if (!weekSelect) return;
+            
+            let currentVal = weekSelect.value;
+            let weeks = new Set();
+            
+            despachos.forEach(d => {
+                let f = formatDateString(getProp(d, ['Fecha Despacho', 'Fecha']));
+                if (f) {
+                    let w = getISOWeek(f);
+                    if (w) weeks.add(w);
+                }
+            });
+
+            weekSelect.innerHTML = '<option value="ALL">Todas las Semanas</option>';
+            Array.from(weeks).sort((a,b) => a - b).forEach(w => {
+                let opt = document.createElement('option');
+                opt.value = w;
+                opt.innerHTML = 'Semana ' + w;
+                if (String(w) === currentVal) opt.selected = true;
+                weekSelect.appendChild(opt);
+            });
+        }
+
+        function updateTablaGeneral() {
+            renderTablaDespachosGeneral(currentFilteredDespachos);
+        }
+
+        function renderTablaDespachosGeneral(despachos) {
+            let tbody = document.getElementById('tbody-despachos-general');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            
+            let weekSelect = document.getElementById('filter-semana-tabla');
+            let selectedWeek = weekSelect ? weekSelect.value : 'ALL';
+
+            let sortedDespachos = [...despachos].sort((a, b) => {
+                let oA = String(getProp(a, ['Origen']) || '-').trim().toUpperCase();
+                let oB = String(getProp(b, ['Origen']) || '-').trim().toUpperCase();
+                return oA.localeCompare(oB);
+            });
+
+            let total = 0;
+
+            sortedDespachos.forEach(d => {
+                let fechaClean = formatDateString(getProp(d, ['Fecha Despacho', 'Fecha']));
+                
+                if (selectedWeek !== 'ALL' && fechaClean) {
+                    let w = getISOWeek(fechaClean);
+                    if (String(w) !== selectedWeek) return; 
+                }
+
+                let origen = String(getProp(d, ['Origen']) || '-').trim().toUpperCase();
+                let destino = getProp(d, ['Destino']) || '-';
+                let zona = getProp(d, ['Zona']) || '-';
+                let cliente = getProp(d, ['Cliente', 'Cliente Principal']) || '-';
+                let descripcion = getProp(d, ['Descripción', 'Descripcion', 'descripción', 'descripcion', 'Desc']) || '-';
+                let kg = parseCleanNumber(getProp(d, ['Kilogramos', 'KG', 'Solicitados']));
+                let sku = getProp(d, ['SKU', 'Sku', 'sku']) || '-';
+                let lineasPedido = getProp(d, ['Líneas del pedido', 'Lineas del pedido', 'Líneas', 'Lineas', 'Pedido', 'Detalle']) || '-';
+                let vehiculo = getProp(d, ['Vehiculo', 'Vehículo']) || '-';
+                let status = getProp(d, ['Status', 'Estado', 'Estatus']) || '-';
+                let novedad = getProp(d, ['Novedad', 'Novedades', 'Observación', 'Observaciones']) || '-';
+                
+                total += kg;
+                
+                let tr = `<tr>
+                    <td style="white-space: nowrap;">${fechaClean}</td>
+                    <td style="white-space: nowrap; font-weight:bold;">${origen}</td>
+                    <td style="white-space: nowrap;">${destino}</td>
+                    <td style="white-space: nowrap;">${zona}</td>
+                    <td>${cliente}</td>
+                    <td>${descripcion}</td>
+                    <td style="font-weight:bold; white-space: nowrap; text-align: right;">${fmtNumber(kg)}</td>
+                    <td style="white-space: nowrap;">${sku}</td>
+                    <td style="white-space: nowrap;">${lineasPedido}</td>
+                    <td style="white-space: nowrap;"><b>${vehiculo}</b></td>
+                    <td style="white-space: nowrap; text-align: center;"><span style="background:#eef5fb; padding:4px 8px; border-radius:4px; font-weight:bold; color:#0055a5; font-size:0.9em;">${status}</span></td>
+                    <td>${novedad}</td>
+                </tr>`;
+                tbody.innerHTML += tr;
+            });
+
+            tbody.innerHTML += `<tr class='table-footer'>
+                <td colspan='6' style='text-align: right; padding-right: 15px; font-size: 1.1em;'>Total Visible</td>
+                <td class="footer-total-val" style='text-align: right; font-size: 1.1em; color: #dc3545;'>${fmtNumber(total)}</td>
+                <td colspan='5'></td>
+            </tr>`;
+
+            filterTableDOM('tbody-despachos-general', 6);
+        }
+
+        // ==========================================
+        // MÓDULO RECEPCIONES
+        // ==========================================
+        function renderModuloRecepciones(recepciones, fechaActual) {
+            let recFechas = {};
+            let recDestinosMes = {};
+            
+            recepciones.forEach(r => {
+                let f = formatDateString(getProp(r, ['FECHA', 'Fecha']));
+                let dest = getProp(r, ['DESTINO', 'Destino']) || 'OTRO';
+                let total = parseCleanNumber(getProp(r, ['Total', 'Kilogramos', 'Cantidad']));
+                if (f) recFechas[f] = (recFechas[f] || 0) + total;
+                recDestinosMes[dest] = (recDestinosMes[dest] || 0) + total;
+            });
+
+            let rFechasKeys = Object.keys(recFechas).sort();
+            
+            let dataRecFechas = rFechasKeys.map((f, index) => ({
+                x: [f], y: [recFechas[f]], name: f, type: 'bar', marker: {color: dynamicBarColors[index % dynamicBarColors.length]}
+            }));
+            Plotly.newPlot('chart-recepciones-fechas', dataRecFechas, { 
+                title: 'Comparativa de Recepciones por Fecha', 
+                xaxis: { type: 'category', tickangle: -45 }, 
+                paper_bgcolor: 'transparent', 
+                plot_bgcolor: 'transparent',
+                margin: { b: 80 }
+            }, {responsive: true});
+
+            let dataRecDestPie = [{
+                labels: Object.keys(recDestinosMes),
+                values: Object.values(recDestinosMes),
+                type: 'pie', hole: 0.3, marker: { colors: dynamicBarColors }
+            }];
+            Plotly.newPlot('chart-recepciones-destino-pie', dataRecDestPie, { title: 'Total de kg a recibir por destino', paper_bgcolor: 'transparent', plot_bgcolor: 'transparent' }, {responsive: true});
+
+            let recDia = recepciones.filter(r => formatDateString(getProp(r, ['FECHA', 'Fecha'])) === fechaActual);
+            let destDiaMap = {};
+            let productosPorBodega = {};
+
+            recDia.forEach(r => {
+                let dest = getProp(r, ['DESTINO', 'Destino']) || 'DESCONOCIDO';
+                let prod = getProp(r, ['PRODUCTO', 'Producto']) || 'GENERAL';
+                let kg = parseCleanNumber(getProp(r, ['Total', 'Kilogramos', 'Cantidad']));
+
+                destDiaMap[dest] = (destDiaMap[dest] || 0) + kg;
+
+                if (!productosPorBodega[dest]) productosPorBodega[dest] = {};
+                productosPorBodega[dest][prod] = (productosPorBodega[dest][prod] || 0) + kg;
+            });
+
+            let dataBarDia = Object.keys(destDiaMap).map((d, index) => ({
+                x: [d], y: [destDiaMap[d]], name: d, type: 'bar', marker: {color: dynamicBarColors[index % dynamicBarColors.length]}
+            }));
+            Plotly.newPlot('chart-recepciones-barras-dia', dataBarDia, { title: `KG a Recibir por Destino (${fechaActual})`, paper_bgcolor: 'transparent', plot_bgcolor: 'transparent' }, {responsive: true});
+
+            const titleTab = document.getElementById('titulo-tabs-recepcion');
+            if (titleTab) titleTab.innerText = `Vista Dinámica por Destino (${fechaActual})`;
+            
+            let btnContainer = document.getElementById('tab-buttons-container');
+            let contentContainer = document.getElementById('tab-contents-container');
+            if (btnContainer) btnContainer.innerHTML = '';
+            if (contentContainer) contentContainer.innerHTML = '';
+
+            let bodegas = Object.keys(productosPorBodega);
+            bodegas.forEach((bodega, index) => {
+                let tabId = 'tab_' + bodega.replace(/[^a-zA-Z0-9]/g, '_');
+                
+                if (btnContainer) {
+                    let btn = document.createElement('button');
+                    btn.className = `tab-button ${index === 0 ? 'active' : ''}`;
+                    btn.innerText = bodega;
+                    btn.onclick = (e) => openTab(e, tabId);
+                    btnContainer.appendChild(btn);
+                }
+
+                let prods = productosPorBodega[bodega];
+                let rowsHtml = '';
+                let totalBodega = 0;
+                for (let p in prods) {
+                    totalBodega += prods[p];
+                    rowsHtml += `<tr><td style='text-align:left;'>${p}</td><td style='text-align:right; white-space:nowrap;'>${fmtNumber(prods[p])} kg</td></tr>`;
+                }
+
+                if (contentContainer) {
+                    let tabDiv = document.createElement('div');
+                    tabDiv.id = tabId;
+                    tabDiv.className = 'tab-content';
+                    tabDiv.style.display = index === 0 ? 'block' : 'none';
+                    tabDiv.innerHTML = `
+                        <h4 style='color:#0055a5; text-align:center; margin-top:0;'>Productos a recibir en ${bodega}</h4>
+                        <table style='width:80%; margin:auto; border:1px solid #ddd;'>
+                            <thead style='background-color:#0055a5; color: white;'>
+                                <tr><th style='text-align:left;'>Producto</th><th style='text-align:right;'>Cantidad (kg)</th></tr>
+                            </thead>
+                            <tbody>
+                                ${rowsHtml}
+                                <tr style='background-color:#eef5fb; font-weight:bold;'>
+                                    <td style='text-align:right;'>TOTAL:</td>
+                                    <td style='text-align:right;'>${fmtNumber(totalBodega)} kg</td>
+                                </tr>
+                            </tbody>
+                        </table>`;
+                    contentContainer.appendChild(tabDiv);
+                }
+            });
+
+            const titleDetalle = document.getElementById('titulo-detalle-recepcion');
+            if (titleDetalle) titleDetalle.innerText = `Detalle General de Recepciones: ${fechaActual}`;
+            
+            let tbodyRec = document.getElementById('tbody-recepciones-dia');
+            if (!tbodyRec) return;
+            tbodyRec.innerHTML = '';
+            let totalRecDia = 0;
+
+            recDia.forEach(r => {
+                let fechaClean = formatDateString(getProp(r, ['FECHA', 'Fecha']));
+                let kg = parseCleanNumber(getProp(r, ['Total', 'Kilogramos', 'Cantidad']));
+                totalRecDia += kg;
+                let tr = `<tr>
+                    <td style="white-space:nowrap;">${fechaClean}</td>
+                    <td style="white-space:nowrap;">${getProp(r, ['IMPORTACION', 'Importacion'])}</td>
+                    <td style="white-space:nowrap;">${getProp(r, ['DESTINO', 'Destino'])}</td>
+                    <td>${getProp(r, ['PRODUCTO', 'Producto'])}</td>
+                    <td style="white-space:nowrap; text-align:right;">${fmtNumber(kg)}</td>
+                </tr>`;
+                tbodyRec.innerHTML += tr;
+            });
+
+            tbodyRec.innerHTML += `<tr class='table-footer' style='background-color: #e2eef8;'><td colspan='4' style='text-align:right; padding-right:15px;'>Total Recepciones (${fechaActual})</td><td style='text-align:right;'>${fmtNumber(totalRecDia)}</td></tr>`;
+        }
+
+        function openTab(evt, tabName) {
+            let tabcontent = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabcontent.length; i++) { tabcontent[i].style.display = "none"; }
+            let tablinks = document.getElementsByClassName("tab-button");
+            for (let i = 0; i < tablinks.length; i++) { tablinks[i].className = tablinks[i].className.replace(" active", ""); }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        function openModalNs() {
+            let tbody = document.getElementById('tbody-modal-ns');
+            tbody.innerHTML = '';
+            
+            currentFilteredDespachos.forEach(d => {
+                let nsRaw = getProp(d, ['Nivel de Servicio', 'Nivel Servicio', 'Nivel_de_Servicio']);
+                let isLessThan100 = false;
+                let nsFormateado = '-';
+                
+                if (nsRaw !== '' && nsRaw !== null) {
+                    let parsedNs = parseFloat(String(nsRaw).replace(',', '.'));
+                    
+                    if (!isNaN(parsedNs)) {
+                        let percentageValue = (parsedNs <= 1 && !String(nsRaw).includes('%')) ? parsedNs * 100 : parsedNs;
+                        
+                        if (percentageValue < 100) {
+                            isLessThan100 = true;
+                            nsFormateado = Math.round(percentageValue) + '%';
+                        }
+                    }
+                }
+
+                if (!isLessThan100) return;
+
+                let cliente = getProp(d, ['Cliente', 'Cliente Principal']) || '-';
+                let descripcion = getProp(d, ['Descripción', 'Descripcion', 'descripción', 'descripcion', 'Desc']) || '-';
+                let status = getProp(d, ['Status', 'Estado', 'Estatus']) || '-';
+                let despachado = parseCleanNumber(getProp(d, ['Kilogramos', 'KG', 'Solicitados']));
+                let novedad = getProp(d, ['Novedad', 'Novedades', 'Observación', 'Observaciones']) || '-';
+
+                let tr = `<tr>
+                    <td>${cliente}</td>
+                    <td>${descripcion}</td>
+                    <td style="text-align: center; font-weight: bold; color: #dc3545;">${nsFormateado}</td>
+                    <td style="text-align: center;"><span style="background:#eef5fb; padding:4px 8px; border-radius:4px; font-weight:bold; color:#0055a5; font-size:0.9em;">${status}</span></td>
+                    <td style="text-align: right; font-weight: bold;">${fmtInt(despachado)} kg</td>
+                    <td>${novedad}</td>
+                </tr>`;
+                tbody.innerHTML += tr;
+            });
+
+            document.getElementById('modal-ns').style.display = 'block';
+        }
+
+        function closeModalNs() {
+            document.getElementById('modal-ns').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            let modal = document.getElementById('modal-ns');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        window.onload = () => {
+            initDashboard();
+            setInterval(initDashboard, 60000);
+        };
+    </script>
+</body>
+</html>
